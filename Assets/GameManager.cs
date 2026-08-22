@@ -63,4 +63,10 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("Nova partida iniciada.");
     }
+
+    public bool IsMatchFinished()
+    {
+    return Player1Medals >= medalsToWin ||
+           Player2Medals >= medalsToWin;
+    }
 }
