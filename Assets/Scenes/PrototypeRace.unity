@@ -785,7 +785,7 @@ GameObject:
   - component: {fileID: 818784569}
   - component: {fileID: 818784568}
   - component: {fileID: 818784567}
-  - component: {fileID: 818784571}
+  - component: {fileID: 818784570}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -867,7 +867,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &818784571
+--- !u!114 &818784570
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -876,12 +876,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 818784566}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004d625cbb06b2c409a9eabd5b8482dd, type: 3}
+  m_Script: {fileID: 11500000, guid: 9fd84b4cf686cd54cb63b591edca88a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
-  target: {fileID: 1297175553}
-  smoothSpeed: 5
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerCameraFollow
+  targets:
+  - {fileID: 1297175553}
+  - {fileID: 255149370}
+  moveSmoothTime: 0.2
   offset: {x: 0, y: 1, z: -10}
+  minZoom: 5
+  maxZoom: 12
+  zoomPadding: 2
+  zoomSmoothTime: 0.2
 --- !u!1 &822648897
 GameObject:
   m_ObjectHideFlags: 0
