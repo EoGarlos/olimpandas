@@ -7,6 +7,7 @@ public class FinishLine : MonoBehaviour
     [SerializeField] private GameObject victoryPanel;
     [SerializeField] private TMP_Text victoryText;
     [SerializeField] private TMP_Text medalText;
+    [SerializeField] private TMP_Text nextButtonText;
 
     private bool raceFinished = false;
 
@@ -18,31 +19,37 @@ public class FinishLine : MonoBehaviour
         if (!other.CompareTag("Player"))
             return;
 
-        raceFinished = true;
-
-        // Por enquanto este personagem é o Player 1.
-        int playerId = 1;
-
-        bool matchFinished = GameManager.Instance.AddMedal(playerId);
-
-        Rigidbody2D rb = other.GetComponent<Rigidbody2D>();
-
-        if (rb != null)
-            rb.linearVelocity = Vector2.zero;
-
-        PlayerController controller =
+        PlayerController winner =
             other.GetComponent<PlayerController>();
 
-        if (controller != null)
-            controller.enabled = false;
+        if (winner == null)
+            return;
+
+        raceFinished = true;
+
+        int playerId = winner.PlayerId;
+
+        bool matchFinished =
+            GameManager.Instance.AddMedal(playerId);
+
+        // Congela todos os jogadores
+        FreezeAllPlayers();
 
         if (matchFinished)
         {
-            victoryText.text = "CAMPEÃO!";
+            victoryText.text =
+                $"PLAYER {playerId}\nCAMPEÃO!";
+
+            nextButtonText.text =
+                "JOGAR NOVAMENTE";
         }
         else
         {
-            victoryText.text = "VITÓRIA!";
+            victoryText.text =
+                $"PLAYER {playerId}\nVENCEU!";
+
+            nextButtonText.text =
+                "PRÓXIMA PROVA";
         }
 
         medalText.text =
@@ -51,9 +58,30 @@ public class FinishLine : MonoBehaviour
         victoryPanel.SetActive(true);
 
         Debug.Log(
-            matchFinished
-                ? "PLAYER 1 VENCEU A PARTIDA!"
-                : "PLAYER 1 VENCEU A PROVA!"
+            $"PLAYER {playerId} VENCEU A PROVA!"
         );
+    }
+
+    private void FreezeAllPlayers()
+    {
+        PlayerController[] players =
+            FindObjectsByType<PlayerController>(
+                FindObjectsSortMode.None
+            );
+
+        foreach (PlayerController player in players)
+        {
+            Rigidbody2D rb =
+                player.GetComponent<Rigidbody2D>();
+
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+                rb.simulated = false;
+            }
+
+            player.enabled = false;
+        }
     }
 }

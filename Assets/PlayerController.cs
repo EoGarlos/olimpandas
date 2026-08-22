@@ -3,6 +3,15 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Jogador")]
+    [SerializeField] private int playerId = 1;
+
+    [Header("Controles")]
+    [SerializeField] private KeyCode leftKey = KeyCode.A;
+    [SerializeField] private KeyCode rightKey = KeyCode.D;
+    [SerializeField] private KeyCode jumpKey = KeyCode.Space;
+    [SerializeField] private KeyCode dashKey = KeyCode.LeftShift;
+
     [Header("Movimento")]
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float jumpForce = 10f;
@@ -21,6 +30,8 @@ public class PlayerController : MonoBehaviour
     private bool isDashing;
     private bool canDash = true;
 
+    public int PlayerId => playerId;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -28,12 +39,17 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        horizontal = Input.GetAxisRaw("Horizontal");
+        horizontal = 0;
+
+        if (Input.GetKey(leftKey))
+            horizontal = -1;
+        else if (Input.GetKey(rightKey))
+            horizontal = 1;
 
         if (horizontal != 0)
             lastDirection = Mathf.Sign(horizontal);
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (Input.GetKeyDown(jumpKey) && isGrounded)
         {
             rb.linearVelocity = new Vector2(
                 rb.linearVelocity.x,
@@ -43,7 +59,7 @@ public class PlayerController : MonoBehaviour
             isGrounded = false;
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
+        if (Input.GetKeyDown(dashKey) && canDash)
         {
             StartCoroutine(Dash());
         }
