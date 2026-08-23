@@ -34,11 +34,14 @@ public class PlayerController : MonoBehaviour
     private bool isDashing;
     private bool canDash = true;
 
-    // Um único dash permitido enquanto estiver no ar.
+    private bool isStunned = false;
+
+    private float movementMultiplier = 1f;
+
     private bool airDashAvailable = true;
 
-    // Guarda quais colliders estão servindo como chão.
-    private readonly HashSet<Collider2D> groundColliders = new();
+    private readonly HashSet<Collider2D>
+        groundColliders = new();
 
     public int PlayerId => playerId;
 
@@ -46,13 +49,16 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
-        // Visual do personagem
-        Transform visual = transform.Find("Visual");
+        Transform visual =
+            transform.Find("Visual");
 
         if (visual != null)
         {
-            animator = visual.GetComponent<Animator>();
-            spriteRenderer = visual.GetComponent<SpriteRenderer>();
+            animator =
+                visual.GetComponent<Animator>();
+
+            spriteRenderer =
+                visual.GetComponent<SpriteRenderer>();
         }
         else
         {
@@ -61,13 +67,14 @@ public class PlayerController : MonoBehaviour
             );
         }
 
-        // Efeito do Dash
-        Transform dashTrailObject = transform.Find("DashTrail");
+        Transform dashTrailObject =
+            transform.Find("DashTrail");
 
         if (dashTrailObject != null)
         {
             dashTrail =
-                dashTrailObject.GetComponent<TrailRenderer>();
+                dashTrailObject
+                    .GetComponent<TrailRenderer>();
 
             if (dashTrail != null)
             {
@@ -75,16 +82,20 @@ public class PlayerController : MonoBehaviour
                 dashTrail.Clear();
             }
         }
-        else
-        {
-            Debug.LogWarning(
-                $"{name}: objeto filho 'DashTrail' não encontrado."
-            );
-        }
     }
 
     private void Update()
     {
+        // Stun bloqueia todos os comandos.
+        if (isStunned)
+        {
+            horizontal = 0f;
+
+            UpdateAnimations();
+
+            return;
+        }
+
         ReadMovementInput();
         UpdateAnimations();
         UpdateDirection();
@@ -94,12 +105,14 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Durante o dash, movimento normal não interfere.
         if (isDashing)
             return;
 
         rb.linearVelocity = new Vector2(
-            horizontal * moveSpeed,
+            horizontal *
+            moveSpeed *
+            movementMultiplier,
+
             rb.linearVelocity.y
         );
     }
@@ -149,7 +162,8 @@ public class PlayerController : MonoBehaviour
         if (horizontal == 0f)
             return;
 
-        lastDirection = Mathf.Sign(horizontal);
+        lastDirection =
+            Mathf.Sign(horizontal);
 
         if (spriteRenderer != null)
         {
@@ -183,7 +197,6 @@ public class PlayerController : MonoBehaviour
         if (!canDash || isDashing)
             return;
 
-        // No ar, permite somente um Dash.
         if (!isGrounded)
         {
             if (!airDashAvailable)
@@ -208,14 +221,12 @@ public class PlayerController : MonoBehaviour
             );
         }
 
-        // Liga o rastro.
         if (dashTrail != null)
         {
             dashTrail.Clear();
             dashTrail.emitting = true;
         }
 
-        // Dash horizontal.
         rb.linearVelocity = new Vector2(
             lastDirection * dashSpeed,
             0f
@@ -235,9 +246,6 @@ public class PlayerController : MonoBehaviour
             );
         }
 
-        // Para de gerar rastro.
-        // O que já foi desenhado desaparece
-        // suavemente conforme o Time do TrailRenderer.
         if (dashTrail != null)
         {
             dashTrail.emitting = false;
@@ -250,12 +258,60 @@ public class PlayerController : MonoBehaviour
         canDash = true;
     }
 
+    public void SetStunned(bool stunned)
+    {
+        isStunned = stunned;
+
+        if (!stunned)
+            return;
+
+        horizontal = 0f;
+
+        // Interrompe visualmente o Dash.
+        isDashing = false;
+
+        if (dashTrail != null)
+        {
+            dashTrail.emitting = false;
+        }
+
+        if (animator != null)
+        {
+            animator.SetBool(
+                "isMoving",
+                false
+            );
+
+            animator.SetBool(
+                "isDashing",
+                false
+            );
+        }
+
+        // Para somente movimento horizontal.
+        rb.linearVelocity = new Vector2(
+            0f,
+            rb.linearVelocity.y
+        );
+    }
+
+    public void SetMovementMultiplier(
+        float multiplier
+    )
+    {
+        movementMultiplier =
+            Mathf.Clamp(
+                multiplier,
+                0.1f,
+                1f
+            );
+    }
+
     public void FinishRace(bool victorious)
     {
         horizontal = 0f;
         isDashing = false;
 
-        // Garante que nenhum efeito fique ativo.
         if (dashTrail != null)
         {
             dashTrail.emitting = false;
@@ -336,8 +392,6 @@ public class PlayerController : MonoBehaviour
 
                 isGrounded = true;
 
-                // Tocou o chão:
-                // recupera o Air Dash.
                 airDashAvailable = true;
 
                 return;

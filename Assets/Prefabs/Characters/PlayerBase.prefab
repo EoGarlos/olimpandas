@@ -298,6 +298,7 @@ GameObject:
   - component: {fileID: 50029558329952954}
   - component: {fileID: 4318926804949780899}
   - component: {fileID: -3742562900645098781}
+  - component: {fileID: -1134422085350454766}
   m_Layer: 0
   m_Name: PlayerBase
   m_TagString: Player
@@ -467,3 +468,15 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
+--- !u!114 &-1134422085350454766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5256377273297578779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17298238cefc7c04c981da005c502626, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStatusEffects
