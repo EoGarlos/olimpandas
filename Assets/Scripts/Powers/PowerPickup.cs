@@ -6,17 +6,24 @@ public class PowerPickup : MonoBehaviour
     [SerializeField]
     private PlayerPowerInventory.PowerType powerType;
 
-    [Header("Respawn")]
+    [Header("Respawn independente")]
     [SerializeField] private float respawnDelay = 5f;
 
     private SpriteRenderer spriteRenderer;
-
     private bool isAvailable = true;
+
+    private PowerSpawnManager spawnManager;
 
     private void Awake()
     {
-        spriteRenderer =
-            GetComponent<SpriteRenderer>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    public void SetSpawnManager(
+        PowerSpawnManager manager
+    )
+    {
+        spawnManager = manager;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -30,30 +37,33 @@ public class PowerPickup : MonoBehaviour
         if (inventory == null)
             return;
 
+        isAvailable = false;
+
         inventory.GrantPower(powerType);
 
-        StartCoroutine(
-            RespawnRoutine()
-        );
+        if (spawnManager != null)
+        {
+            spawnManager.NotifyPickupCollected();
+
+            Destroy(gameObject);
+
+            return;
+        }
+
+        StartCoroutine(RespawnRoutine());
     }
 
     private IEnumerator RespawnRoutine()
     {
-        isAvailable = false;
-
         if (spriteRenderer != null)
-        {
             spriteRenderer.enabled = false;
-        }
 
         yield return new WaitForSeconds(
             respawnDelay
         );
 
         if (spriteRenderer != null)
-        {
             spriteRenderer.enabled = true;
-        }
 
         isAvailable = true;
     }
