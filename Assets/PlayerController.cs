@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Dash")]
     [SerializeField] private float dashSpeed = 15f;
-    [SerializeField] private float dashDuration = 0.15f;
+    [SerializeField] private float dashDuration = 0.30f;
     [SerializeField] private float dashCooldown = 1f;
 
     private Rigidbody2D rb;
@@ -33,7 +33,10 @@ public class PlayerController : MonoBehaviour
     private bool isDashing;
     private bool canDash = true;
 
-    // Guarda quais colliders estão servindo como chão
+    // Um único dash permitido enquanto estiver no ar.
+    private bool airDashAvailable = true;
+
+    // Guarda quais colliders estão servindo como chão.
     private readonly HashSet<Collider2D> groundColliders = new();
 
     public int PlayerId => playerId;
@@ -42,7 +45,6 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
-        // Procura especificamente o filho chamado Visual
         Transform visual = transform.Find("Visual");
 
         if (visual != null)
@@ -69,6 +71,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // Durante o dash, o movimento normal não interfere.
         if (isDashing)
             return;
 
@@ -111,18 +114,23 @@ public class PlayerController : MonoBehaviour
             "isGrounded",
             isGrounded
         );
+
+        animator.SetBool(
+            "isDashing",
+            isDashing
+        );
     }
 
     private void UpdateDirection()
     {
-        if (horizontal == 0)
+        if (horizontal == 0f)
             return;
 
         lastDirection = Mathf.Sign(horizontal);
 
         if (spriteRenderer != null)
         {
-            spriteRenderer.flipX = horizontal < 0;
+            spriteRenderer.flipX = horizontal < 0f;
         }
     }
 
@@ -130,10 +138,6 @@ public class PlayerController : MonoBehaviour
     {
         if (!Input.GetKeyDown(jumpKey))
             return;
-
-        Debug.Log(
-            $"{name} tentou pular | Grounded: {isGrounded}"
-        );
 
         if (!isGrounded)
             return;
@@ -143,17 +147,29 @@ public class PlayerController : MonoBehaviour
             jumpForce
         );
 
-        // Remove temporariamente o estado de chão.
+        // Saiu do chão.
         groundColliders.Clear();
         isGrounded = false;
     }
 
     private void HandleDash()
     {
-        if (Input.GetKeyDown(dashKey) && canDash)
+        if (!Input.GetKeyDown(dashKey))
+            return;
+
+        if (!canDash || isDashing)
+            return;
+
+        // Se estiver no ar, só permite um dash.
+        if (!isGrounded)
         {
-            StartCoroutine(Dash());
+            if (!airDashAvailable)
+                return;
+
+            airDashAvailable = false;
         }
+
+        StartCoroutine(Dash());
     }
 
     private IEnumerator Dash()
@@ -161,6 +177,12 @@ public class PlayerController : MonoBehaviour
         canDash = false;
         isDashing = true;
 
+        if (animator != null)
+        {
+            animator.SetBool("isDashing", true);
+        }
+
+        // Dash sempre horizontal, na última direção olhada.
         rb.linearVelocity = new Vector2(
             lastDirection * dashSpeed,
             0f
@@ -169,6 +191,11 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(dashDuration);
 
         isDashing = false;
+
+        if (animator != null)
+        {
+            animator.SetBool("isDashing", false);
+        }
 
         yield return new WaitForSeconds(dashCooldown);
 
@@ -196,11 +223,16 @@ public class PlayerController : MonoBehaviour
     {
         foreach (ContactPoint2D contact in collision.contacts)
         {
-            // Normal apontando para cima = existe algo sob os pés
+            // Normal apontando para cima = existe algo sob os pés.
             if (contact.normal.y > 0.5f)
             {
                 groundColliders.Add(collision.collider);
+
                 isGrounded = true;
+
+                // Tocou o chão: recupera o Air Dash.
+                airDashAvailable = true;
+
                 return;
             }
         }
