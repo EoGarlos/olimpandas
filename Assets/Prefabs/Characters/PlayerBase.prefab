@@ -151,6 +151,37 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 0
   m_ApplyActiveColorSpace: 1
+--- !u!1 &2915088481846509660
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2470724940791344693}
+  m_Layer: 0
+  m_Name: PowerSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2470724940791344693
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2915088481846509660}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.7, y: 0.35, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3317407939725242005}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4412663192068506626
 GameObject:
   m_ObjectHideFlags: 0
@@ -299,6 +330,7 @@ GameObject:
   - component: {fileID: 4318926804949780899}
   - component: {fileID: -3742562900645098781}
   - component: {fileID: -1134422085350454766}
+  - component: {fileID: 128481838932801064}
   m_Layer: 0
   m_Name: PlayerBase
   m_TagString: Player
@@ -321,6 +353,7 @@ Transform:
   m_Children:
   - {fileID: 9221083721618737904}
   - {fileID: 3538387849265635387}
+  - {fileID: 2470724940791344693}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &293008517802584352
@@ -480,3 +513,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17298238cefc7c04c981da005c502626, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatusEffects
+--- !u!114 &128481838932801064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5256377273297578779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fb77f3d81fc0f04d8d7c9bb68e56c9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StunPowerController
+  powerKey: 101
+  projectilePrefab: {fileID: 5918645786191009069, guid: cb805db008638344eb6ff96cda8e2fc6, type: 3}
+  powerSpawn: {fileID: 2470724940791344693}
+  cooldown: 2.5

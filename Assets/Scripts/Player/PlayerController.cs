@@ -44,6 +44,8 @@ public class PlayerController : MonoBehaviour
         groundColliders = new();
 
     public int PlayerId => playerId;
+    public float FacingDirection => lastDirection;
+    public bool IsStunned => isStunned;
 
     private void Awake()
     {
