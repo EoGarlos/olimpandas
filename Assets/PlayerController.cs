@@ -201,6 +201,24 @@ public class PlayerController : MonoBehaviour
 
         canDash = true;
     }
+    public void FinishRace(bool victorious)
+    {
+        horizontal = 0f;
+        isDashing = false;
+
+        if (animator != null)
+        {
+            animator.SetBool("isMoving", false);
+            animator.SetBool("isDashing", false);
+            animator.SetFloat("verticalVelocity", 0f);
+            animator.SetBool("isGrounded", true);
+
+            if (victorious)
+            {
+                animator.SetTrigger("Victory");
+            }
+        }
+    }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {

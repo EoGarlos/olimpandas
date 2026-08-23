@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using TMPro;
 
@@ -9,9 +10,32 @@ public class FinishLine : MonoBehaviour
     [SerializeField] private TMP_Text medalText;
     [SerializeField] private TMP_Text nextButtonText;
 
+    [Header("Câmera")]
+    [SerializeField]
+    private MultiplayerCameraFollow multiplayerCamera;
+
+    [Header("Tempos")]
+    [SerializeField]
+    private float victoryDisplayDelay = 1.1f;
+
     private bool raceFinished = false;
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void Awake()
+    {
+        // Se esquecer de arrastar a câmera,
+        // tenta encontrar automaticamente.
+        if (multiplayerCamera == null)
+        {
+            multiplayerCamera =
+                FindFirstObjectByType<
+                    MultiplayerCameraFollow
+                >();
+        }
+    }
+
+    private void OnTriggerEnter2D(
+        Collider2D other
+    )
     {
         if (raceFinished)
             return;
@@ -30,10 +54,20 @@ public class FinishLine : MonoBehaviour
         int playerId = winner.PlayerId;
 
         bool matchFinished =
-            GameManager.Instance.AddMedal(playerId);
+            GameManager.Instance.AddMedal(
+                playerId
+            );
 
-        // Congela todos os jogadores
-        FreezeAllPlayers();
+        // Primeiro trava a prova.
+        FreezeAllPlayers(winner);
+
+        // Depois aproxima no vencedor.
+        if (multiplayerCamera != null)
+        {
+            multiplayerCamera.FocusOnWinner(
+                winner.transform
+            );
+        }
 
         if (matchFinished)
         {
@@ -53,30 +87,55 @@ public class FinishLine : MonoBehaviour
         }
 
         medalText.text =
-            $"MEDALHAS\n{GameManager.Instance.GetScore()}";
+            $"MEDALHAS\n" +
+            $"{GameManager.Instance.GetScore()}";
 
-        victoryPanel.SetActive(true);
+        // Espera a animação aparecer
+        // antes de mostrar o painel.
+        StartCoroutine(
+            ShowVictoryPanel()
+        );
 
         Debug.Log(
             $"PLAYER {playerId} VENCEU A PROVA!"
         );
     }
 
-    private void FreezeAllPlayers()
+    private IEnumerator ShowVictoryPanel()
+    {
+        yield return new WaitForSeconds(
+            victoryDisplayDelay
+        );
+
+        victoryPanel.SetActive(true);
+    }
+
+    private void FreezeAllPlayers(
+        PlayerController winner
+    )
     {
         PlayerController[] players =
             FindObjectsByType<PlayerController>(
                 FindObjectsSortMode.None
             );
 
-        foreach (PlayerController player in players)
+        foreach (
+            PlayerController player in players
+        )
         {
+            bool isWinner =
+                player == winner;
+
+            player.FinishRace(isWinner);
+
             Rigidbody2D rb =
                 player.GetComponent<Rigidbody2D>();
 
             if (rb != null)
             {
-                rb.linearVelocity = Vector2.zero;
+                rb.linearVelocity =
+                    Vector2.zero;
+
                 rb.angularVelocity = 0f;
                 rb.simulated = false;
             }
