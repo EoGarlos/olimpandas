@@ -10,7 +10,6 @@ public class PowerPickup : MonoBehaviour
     [SerializeField] private float respawnDelay = 5f;
 
     private SpriteRenderer spriteRenderer;
-    private Collider2D pickupCollider;
 
     private bool isAvailable = true;
 
@@ -18,9 +17,6 @@ public class PowerPickup : MonoBehaviour
     {
         spriteRenderer =
             GetComponent<SpriteRenderer>();
-
-        pickupCollider =
-            GetComponent<Collider2D>();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -36,7 +32,9 @@ public class PowerPickup : MonoBehaviour
 
         inventory.GrantPower(powerType);
 
-        StartCoroutine(RespawnRoutine());
+        StartCoroutine(
+            RespawnRoutine()
+        );
     }
 
     private IEnumerator RespawnRoutine()
@@ -44,20 +42,18 @@ public class PowerPickup : MonoBehaviour
         isAvailable = false;
 
         if (spriteRenderer != null)
+        {
             spriteRenderer.enabled = false;
-
-        if (pickupCollider != null)
-            pickupCollider.enabled = false;
+        }
 
         yield return new WaitForSeconds(
             respawnDelay
         );
 
         if (spriteRenderer != null)
+        {
             spriteRenderer.enabled = true;
-
-        if (pickupCollider != null)
-            pickupCollider.enabled = true;
+        }
 
         isAvailable = true;
     }
