@@ -21,16 +21,16 @@ O protótipo atual possui:
 - medalhas persistentes entre rodadas;
 - partida melhor de três;
 - interface de resultado e opção de próxima prova ou nova partida;
-- base inicial para personagem animado e prefabs reutilizáveis em desenvolvimento.
+- Panda-gigante integrado com animações de Idle, Run, Jump, Fall, Dash e Victory;
 
 ## Controles
 
-| Ação | Jogador 1 | Jogador 2 |
-| --- | --- | --- |
-| Mover para a esquerda | `A` | `Seta para a esquerda` |
-| Mover para a direita | `D` | `Seta para a direita` |
-| Pular | `W` | `Seta para cima` |
-| Dash | `Shift esquerdo` | `Shift direito` |
+| Ação                  | Jogador 1        | Jogador 2              |
+| --------------------- | ---------------- | ---------------------- |
+| Mover para a esquerda | `A`              | `Seta para a esquerda` |
+| Mover para a direita  | `D`              | `Seta para a direita`  |
+| Pular                 | `W`              | `Seta para cima`       |
+| Dash                  | `Shift esquerdo` | `Shift direito`        |
 
 ## Tecnologias
 
@@ -118,12 +118,12 @@ Olimpandas is a competitive 2D party game built with Unity and C#. Two local pla
 
 ### Controls
 
-| Action | Player 1 | Player 2 |
-| --- | --- | --- |
-| Move left | `A` | `Left Arrow` |
-| Move right | `D` | `Right Arrow` |
-| Jump | `W` | `Up Arrow` |
-| Dash | `Left Shift` | `Right Shift` |
+| Action     | Player 1     | Player 2      |
+| ---------- | ------------ | ------------- |
+| Move left  | `A`          | `Left Arrow`  |
+| Move right | `D`          | `Right Arrow` |
+| Jump       | `W`          | `Up Arrow`    |
+| Dash       | `Left Shift` | `Right Shift` |
 
 ### Run the project
 

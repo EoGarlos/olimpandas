@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour
     [Header("Controles")]
     [SerializeField] private KeyCode leftKey = KeyCode.A;
     [SerializeField] private KeyCode rightKey = KeyCode.D;
-    [SerializeField] private KeyCode jumpKey = KeyCode.Space;
+    [SerializeField] private KeyCode jumpKey = KeyCode.W;
     [SerializeField] private KeyCode dashKey = KeyCode.LeftShift;
 
     [Header("Movimento")]
@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
+    private TrailRenderer dashTrail;
 
     private float horizontal;
     private float lastDirection = 1f;
@@ -45,6 +46,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
+        // Visual do personagem
         Transform visual = transform.Find("Visual");
 
         if (visual != null)
@@ -56,6 +58,27 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogError(
                 $"{name}: objeto filho 'Visual' não encontrado!"
+            );
+        }
+
+        // Efeito do Dash
+        Transform dashTrailObject = transform.Find("DashTrail");
+
+        if (dashTrailObject != null)
+        {
+            dashTrail =
+                dashTrailObject.GetComponent<TrailRenderer>();
+
+            if (dashTrail != null)
+            {
+                dashTrail.emitting = false;
+                dashTrail.Clear();
+            }
+        }
+        else
+        {
+            Debug.LogWarning(
+                $"{name}: objeto filho 'DashTrail' não encontrado."
             );
         }
     }
@@ -71,7 +94,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Durante o dash, o movimento normal não interfere.
+        // Durante o dash, movimento normal não interfere.
         if (isDashing)
             return;
 
@@ -130,7 +153,8 @@ public class PlayerController : MonoBehaviour
 
         if (spriteRenderer != null)
         {
-            spriteRenderer.flipX = horizontal < 0f;
+            spriteRenderer.flipX =
+                horizontal < 0f;
         }
     }
 
@@ -147,7 +171,6 @@ public class PlayerController : MonoBehaviour
             jumpForce
         );
 
-        // Saiu do chão.
         groundColliders.Clear();
         isGrounded = false;
     }
@@ -160,7 +183,7 @@ public class PlayerController : MonoBehaviour
         if (!canDash || isDashing)
             return;
 
-        // Se estiver no ar, só permite um dash.
+        // No ar, permite somente um Dash.
         if (!isGrounded)
         {
             if (!airDashAvailable)
@@ -179,76 +202,142 @@ public class PlayerController : MonoBehaviour
 
         if (animator != null)
         {
-            animator.SetBool("isDashing", true);
+            animator.SetBool(
+                "isDashing",
+                true
+            );
         }
 
-        // Dash sempre horizontal, na última direção olhada.
+        // Liga o rastro.
+        if (dashTrail != null)
+        {
+            dashTrail.Clear();
+            dashTrail.emitting = true;
+        }
+
+        // Dash horizontal.
         rb.linearVelocity = new Vector2(
             lastDirection * dashSpeed,
             0f
         );
 
-        yield return new WaitForSeconds(dashDuration);
+        yield return new WaitForSeconds(
+            dashDuration
+        );
 
         isDashing = false;
 
         if (animator != null)
         {
-            animator.SetBool("isDashing", false);
+            animator.SetBool(
+                "isDashing",
+                false
+            );
         }
 
-        yield return new WaitForSeconds(dashCooldown);
+        // Para de gerar rastro.
+        // O que já foi desenhado desaparece
+        // suavemente conforme o Time do TrailRenderer.
+        if (dashTrail != null)
+        {
+            dashTrail.emitting = false;
+        }
+
+        yield return new WaitForSeconds(
+            dashCooldown
+        );
 
         canDash = true;
     }
+
     public void FinishRace(bool victorious)
     {
         horizontal = 0f;
         isDashing = false;
 
+        // Garante que nenhum efeito fique ativo.
+        if (dashTrail != null)
+        {
+            dashTrail.emitting = false;
+            dashTrail.Clear();
+        }
+
         if (animator != null)
         {
-            animator.SetBool("isMoving", false);
-            animator.SetBool("isDashing", false);
-            animator.SetFloat("verticalVelocity", 0f);
-            animator.SetBool("isGrounded", true);
+            animator.SetBool(
+                "isMoving",
+                false
+            );
+
+            animator.SetBool(
+                "isDashing",
+                false
+            );
+
+            animator.SetFloat(
+                "verticalVelocity",
+                0f
+            );
+
+            animator.SetBool(
+                "isGrounded",
+                true
+            );
 
             if (victorious)
             {
-                animator.SetTrigger("Victory");
+                animator.SetTrigger(
+                    "Victory"
+                );
             }
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(
+        Collision2D collision
+    )
     {
         CheckGroundCollision(collision);
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+    private void OnCollisionStay2D(
+        Collision2D collision
+    )
     {
         CheckGroundCollision(collision);
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
+    private void OnCollisionExit2D(
+        Collision2D collision
+    )
     {
-        groundColliders.Remove(collision.collider);
+        groundColliders.Remove(
+            collision.collider
+        );
 
-        isGrounded = groundColliders.Count > 0;
+        isGrounded =
+            groundColliders.Count > 0;
     }
 
-    private void CheckGroundCollision(Collision2D collision)
+    private void CheckGroundCollision(
+        Collision2D collision
+    )
     {
-        foreach (ContactPoint2D contact in collision.contacts)
+        foreach (
+            ContactPoint2D contact
+            in collision.contacts
+        )
         {
-            // Normal apontando para cima = existe algo sob os pés.
             if (contact.normal.y > 0.5f)
             {
-                groundColliders.Add(collision.collider);
+                groundColliders.Add(
+                    collision.collider
+                );
 
                 isGrounded = true;
 
-                // Tocou o chão: recupera o Air Dash.
+                // Tocou o chão:
+                // recupera o Air Dash.
                 airDashAvailable = true;
 
                 return;
