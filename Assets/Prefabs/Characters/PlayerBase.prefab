@@ -331,6 +331,7 @@ GameObject:
   - component: {fileID: -3742562900645098781}
   - component: {fileID: -1134422085350454766}
   - component: {fileID: 128481838932801064}
+  - component: {fileID: 2045136547486128360}
   m_Layer: 0
   m_Name: PlayerBase
   m_TagString: Player
@@ -527,5 +528,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StunPowerController
   powerKey: 101
   projectilePrefab: {fileID: 5918645786191009069, guid: cb805db008638344eb6ff96cda8e2fc6, type: 3}
+  powerSpawn: {fileID: 2470724940791344693}
+  cooldown: 2.5
+--- !u!114 &2045136547486128360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5256377273297578779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ea3665418265a44da19e013a674fb99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlowPowerController
+  powerKey: 113
+  projectilePrefab: {fileID: 1838643901998996942, guid: 6e1ecb8874e5a7149a5ace2fa0678ceb, type: 3}
   powerSpawn: {fileID: 2470724940791344693}
   cooldown: 2.5
