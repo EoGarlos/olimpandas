@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -22,6 +23,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashCooldown = 1f;
 
     private Rigidbody2D rb;
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
 
     private float horizontal;
     private float lastDirection = 1f;
@@ -29,57 +32,39 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private bool isDashing;
     private bool canDash = true;
-    private Animator animator;
-    private SpriteRenderer spriteRenderer;
+
+    // Guarda quais colliders estão servindo como chão
+    private readonly HashSet<Collider2D> groundColliders = new();
 
     public int PlayerId => playerId;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        animator = GetComponentInChildren<Animator>();
-        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        // Procura especificamente o filho chamado Visual
+        Transform visual = transform.Find("Visual");
+
+        if (visual != null)
+        {
+            animator = visual.GetComponent<Animator>();
+            spriteRenderer = visual.GetComponent<SpriteRenderer>();
+        }
+        else
+        {
+            Debug.LogError(
+                $"{name}: objeto filho 'Visual' não encontrado!"
+            );
+        }
     }
 
     private void Update()
     {
-        horizontal = 0;
-
-        if (Input.GetKey(leftKey))
-            horizontal = -1;
-        else if (Input.GetKey(rightKey))
-            horizontal = 1;
-
-        if (animator != null)
-        {
-            animator.SetBool(
-                "isMoving",
-                Mathf.Abs(horizontal) > 0.01f
-            );
-        }
-
-        if (horizontal != 0)
-        {
-            lastDirection = Mathf.Sign(horizontal);
-
-            if (spriteRenderer != null)
-                spriteRenderer.flipX = horizontal < 0;
-        }
-
-        if (Input.GetKeyDown(jumpKey) && isGrounded)
-        {
-            rb.linearVelocity = new Vector2(
-                rb.linearVelocity.x,
-                jumpForce
-            );
-
-            isGrounded = false;
-        }
-
-        if (Input.GetKeyDown(dashKey) && canDash)
-        {
-            StartCoroutine(Dash());
-        }
+        ReadMovementInput();
+        UpdateAnimations();
+        UpdateDirection();
+        HandleJump();
+        HandleDash();
     }
 
     private void FixedUpdate()
@@ -93,6 +78,84 @@ public class PlayerController : MonoBehaviour
         );
     }
 
+    private void ReadMovementInput()
+    {
+        horizontal = 0f;
+
+        if (Input.GetKey(leftKey))
+        {
+            horizontal = -1f;
+        }
+        else if (Input.GetKey(rightKey))
+        {
+            horizontal = 1f;
+        }
+    }
+
+    private void UpdateAnimations()
+    {
+        if (animator == null)
+            return;
+
+        animator.SetBool(
+            "isMoving",
+            Mathf.Abs(horizontal) > 0.01f
+        );
+
+        animator.SetFloat(
+            "verticalVelocity",
+            rb.linearVelocity.y
+        );
+
+        animator.SetBool(
+            "isGrounded",
+            isGrounded
+        );
+    }
+
+    private void UpdateDirection()
+    {
+        if (horizontal == 0)
+            return;
+
+        lastDirection = Mathf.Sign(horizontal);
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.flipX = horizontal < 0;
+        }
+    }
+
+    private void HandleJump()
+    {
+        if (!Input.GetKeyDown(jumpKey))
+            return;
+
+        Debug.Log(
+            $"{name} tentou pular | Grounded: {isGrounded}"
+        );
+
+        if (!isGrounded)
+            return;
+
+        rb.linearVelocity = new Vector2(
+            rb.linearVelocity.x,
+            jumpForce
+        );
+
+        // Remove temporariamente o estado de chão.
+        groundColliders.Clear();
+        isGrounded = false;
+    }
+
+    private void HandleDash()
+    {
+        if (Input.GetKeyDown(dashKey) && canDash)
+        {
+            StartCoroutine(Dash());
+        }
+    }
+
     private IEnumerator Dash()
     {
         canDash = false;
@@ -100,7 +163,7 @@ public class PlayerController : MonoBehaviour
 
         rb.linearVelocity = new Vector2(
             lastDirection * dashSpeed,
-            0
+            0f
         );
 
         yield return new WaitForSeconds(dashDuration);
@@ -112,20 +175,34 @@ public class PlayerController : MonoBehaviour
         canDash = true;
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        CheckGroundCollision(collision);
+    }
+
     private void OnCollisionStay2D(Collision2D collision)
     {
-        foreach (ContactPoint2D contact in collision.contacts)
-        {
-            if (contact.normal.y > 0.5f)
-            {
-                isGrounded = true;
-                return;
-            }
-        }
+        CheckGroundCollision(collision);
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        isGrounded = false;
+        groundColliders.Remove(collision.collider);
+
+        isGrounded = groundColliders.Count > 0;
+    }
+
+    private void CheckGroundCollision(Collision2D collision)
+    {
+        foreach (ContactPoint2D contact in collision.contacts)
+        {
+            // Normal apontando para cima = existe algo sob os pés
+            if (contact.normal.y > 0.5f)
+            {
+                groundColliders.Add(collision.collider);
+                isGrounded = true;
+                return;
+            }
+        }
     }
 }
