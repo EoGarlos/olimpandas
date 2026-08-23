@@ -29,12 +29,16 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private bool isDashing;
     private bool canDash = true;
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
 
     public int PlayerId => playerId;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponentInChildren<Animator>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     private void Update()
@@ -46,8 +50,21 @@ public class PlayerController : MonoBehaviour
         else if (Input.GetKey(rightKey))
             horizontal = 1;
 
+        if (animator != null)
+        {
+            animator.SetBool(
+                "isMoving",
+                Mathf.Abs(horizontal) > 0.01f
+            );
+        }
+
         if (horizontal != 0)
+        {
             lastDirection = Mathf.Sign(horizontal);
+
+            if (spriteRenderer != null)
+                spriteRenderer.flipX = horizontal < 0;
+        }
 
         if (Input.GetKeyDown(jumpKey) && isGrounded)
         {
