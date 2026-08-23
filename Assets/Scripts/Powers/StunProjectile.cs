@@ -9,8 +9,12 @@ public class StunProjectile : MonoBehaviour
     [Header("Stun")]
     [SerializeField] private float stunDuration = 1.5f;
 
+    [Header("VFX")]
+    [SerializeField] private GameObject impactPrefab;
+
     private Rigidbody2D rb;
     private Collider2D projectileCollider;
+    private SpriteRenderer spriteRenderer;
 
     private GameObject owner;
     private float direction = 1f;
@@ -19,6 +23,7 @@ public class StunProjectile : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         projectileCollider = GetComponent<Collider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     public void Initialize(
@@ -32,6 +37,12 @@ public class StunProjectile : MonoBehaviour
             facingDirection >= 0f
                 ? 1f
                 : -1f;
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.flipX =
+                direction < 0f;
+        }
 
         IgnoreOwnerCollisions();
 
@@ -74,17 +85,30 @@ public class StunProjectile : MonoBehaviour
             }
         }
 
+        SpawnImpact();
+
         PlayerStatusEffects statusEffects =
             other.GetComponent<PlayerStatusEffects>();
 
         if (statusEffects != null)
         {
-            statusEffects.ApplyStun(stunDuration);
-
-            Destroy(gameObject);
-            return;
+            statusEffects.ApplyStun(
+                stunDuration
+            );
         }
 
         Destroy(gameObject);
+    }
+
+    private void SpawnImpact()
+    {
+        if (impactPrefab == null)
+            return;
+
+        Instantiate(
+            impactPrefab,
+            transform.position,
+            Quaternion.identity
+        );
     }
 }

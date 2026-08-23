@@ -230,7 +230,9 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = new Vector2(
-            lastDirection * dashSpeed,
+            lastDirection *
+            dashSpeed *
+            movementMultiplier,
             0f
         );
 
