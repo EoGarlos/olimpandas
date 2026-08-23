@@ -363,6 +363,7 @@ GameObject:
   - component: {fileID: -1134422085350454766}
   - component: {fileID: 128481838932801064}
   - component: {fileID: 2045136547486128360}
+  - component: {fileID: 3533988989024535213}
   m_Layer: 0
   m_Name: PlayerBase
   m_TagString: Player
@@ -581,3 +582,16 @@ MonoBehaviour:
   projectilePrefab: {fileID: -7285905294665502294, guid: 6e1ecb8874e5a7149a5ace2fa0678ceb, type: 3}
   powerSpawn: {fileID: 2470724940791344693}
   cooldown: 2.5
+--- !u!114 &3533988989024535213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5256377273297578779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d866840a7188414c9b0aae9653a20b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerPowerInventory
+  currentPower: 0

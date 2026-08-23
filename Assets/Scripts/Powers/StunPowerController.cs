@@ -1,6 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerController))]
+[RequireComponent(typeof(PlayerPowerInventory))]
 public class StunPowerController : MonoBehaviour
 {
     [Header("Controle")]
@@ -14,6 +15,7 @@ public class StunPowerController : MonoBehaviour
     [SerializeField] private float cooldown = 2.5f;
 
     private PlayerController playerController;
+    private PlayerPowerInventory inventory;
 
     private float nextUseTime = 0f;
 
@@ -21,16 +23,16 @@ public class StunPowerController : MonoBehaviour
     {
         playerController =
             GetComponent<PlayerController>();
+
+        inventory =
+            GetComponent<PlayerPowerInventory>();
     }
 
     private void Update()
     {
-        // Se o PlayerController foi desabilitado
-        // no final da corrida, não permite disparar.
         if (!playerController.enabled)
             return;
 
-        // Stun bloqueia também o uso de poderes.
         if (playerController.IsStunned)
             return;
 
@@ -40,13 +42,23 @@ public class StunPowerController : MonoBehaviour
         if (Time.time < nextUseTime)
             return;
 
-        Fire();
+        if (!inventory.HasPower(
+            PlayerPowerInventory.PowerType.Stun
+        ))
+        {
+            return;
+        }
+
+        if (!Fire())
+            return;
+
+        inventory.ConsumePower();
 
         nextUseTime =
             Time.time + cooldown;
     }
 
-    private void Fire()
+    private bool Fire()
     {
         if (projectilePrefab == null)
         {
@@ -54,7 +66,7 @@ public class StunPowerController : MonoBehaviour
                 $"{name}: Stun Projectile não configurado!"
             );
 
-            return;
+            return false;
         }
 
         if (powerSpawn == null)
@@ -63,7 +75,7 @@ public class StunPowerController : MonoBehaviour
                 $"{name}: PowerSpawn não configurado!"
             );
 
-            return;
+            return false;
         }
 
         float direction =
@@ -95,5 +107,7 @@ public class StunPowerController : MonoBehaviour
             gameObject,
             direction
         );
+
+        return true;
     }
 }

@@ -1,6 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerController))]
+[RequireComponent(typeof(PlayerPowerInventory))]
 public class SlowPowerController : MonoBehaviour
 {
     [Header("Controle")]
@@ -14,12 +15,17 @@ public class SlowPowerController : MonoBehaviour
     [SerializeField] private float cooldown = 2.5f;
 
     private PlayerController playerController;
+    private PlayerPowerInventory inventory;
+
     private float nextUseTime = 0f;
 
     private void Awake()
     {
         playerController =
             GetComponent<PlayerController>();
+
+        inventory =
+            GetComponent<PlayerPowerInventory>();
     }
 
     private void Update()
@@ -36,13 +42,23 @@ public class SlowPowerController : MonoBehaviour
         if (Time.time < nextUseTime)
             return;
 
-        Fire();
+        if (!inventory.HasPower(
+            PlayerPowerInventory.PowerType.Slow
+        ))
+        {
+            return;
+        }
+
+        if (!Fire())
+            return;
+
+        inventory.ConsumePower();
 
         nextUseTime =
             Time.time + cooldown;
     }
 
-    private void Fire()
+    private bool Fire()
     {
         if (projectilePrefab == null)
         {
@@ -50,7 +66,7 @@ public class SlowPowerController : MonoBehaviour
                 $"{name}: Slow Projectile não configurado!"
             );
 
-            return;
+            return false;
         }
 
         if (powerSpawn == null)
@@ -59,7 +75,7 @@ public class SlowPowerController : MonoBehaviour
                 $"{name}: PowerSpawn não configurado!"
             );
 
-            return;
+            return false;
         }
 
         float direction =
@@ -91,5 +107,7 @@ public class SlowPowerController : MonoBehaviour
             gameObject,
             direction
         );
+
+        return true;
     }
 }
