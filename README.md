@@ -51,7 +51,7 @@ O protótipo atual possui:
 ### Passos
 
 ```bash
-git clone https://github.com/patrckmello/olimpandas.git
+git clone https://github.com/EoGarlos/olimpandas.git
 cd olimpandas
 ```
 
